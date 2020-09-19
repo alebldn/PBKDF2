@@ -1,3 +1,0 @@
-"C:\Program Files\JetBrains\CLion 2020.1.1\bin\cmake\win\bin\cmake.exe" -E remove -f CMakeFiles\HMAC_SHA1.dir/objects.a
-C:\MinGW\bin\ar.exe cr CMakeFiles\HMAC_SHA1.dir/objects.a @CMakeFiles\HMAC_SHA1.dir\objects1.rsp
-C:\MinGW\bin\gcc.exe -g   -Wl,--whole-archive CMakeFiles\HMAC_SHA1.dir/objects.a -Wl,--no-whole-archive  -o HMAC_SHA1.exe -Wl,--out-implib,libHMAC_SHA1.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\HMAC_SHA1.dir\linklibs.rsp

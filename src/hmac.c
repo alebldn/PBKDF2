@@ -154,11 +154,15 @@ void hmac(hmac_ctx_t* ctx)
 	uint32_t i;
 	uint8_t temp_counter, temp_word_counter;
 	uint64_t temp_chunk_counter;
-	uint64_t bits_written_in_key;
+	uint64_t bits_written_in_key, bits_written_in_text;
 
 	bits_written_in_key = ctx->sha1_ctx_key.chunk_counter*BITS_PER_BLOCK
 			+ ctx->sha1_ctx_key.word_counter*BITS_PER_WORD
 			+ 32 - ctx->sha1_ctx_key.counter;
+
+    bits_written_in_text = ctx->sha1_ctx_text.chunk_counter*BITS_PER_BLOCK
+                          + ctx->sha1_ctx_text.word_counter*BITS_PER_WORD
+                          + 32 - ctx->sha1_ctx_text.counter;
 
 	if(bits_written_in_key > BITS_PER_BLOCK)
 	{
@@ -216,6 +220,7 @@ void hmac(hmac_ctx_t* ctx)
 	sha1_append_int(&ctx->sha1_ctx_text, ctx->inner_pad.words[14]);
 	sha1_append_int(&ctx->sha1_ctx_text, ctx->inner_pad.words[15]);
 
+	ctx->sha1_ctx_text.num_of_chunks = bits_written_in_text / BITS_PER_BLOCK + 1;
     ctx->sha1_ctx_text.counter = temp_counter;
 	ctx->sha1_ctx_text.word_counter = temp_word_counter;
 	ctx->sha1_ctx_text.chunk_counter = temp_chunk_counter;
@@ -230,9 +235,14 @@ void hmac(hmac_ctx_t* ctx)
 	ctx->digest[4] = ctx->sha1_ctx_text.digest[4];
 
 	sha1_ctx_dispose(&ctx->sha1_ctx_text);
+	/**
+	 * Il problema sta qui
+	 */
 	sha1_ctx_init(&ctx->sha1_ctx_text, 2);
-
-	sha1_append_int(&ctx->sha1_ctx_text, ctx->outer_pad.words[ 0]);
+    /**                                             ^
+    *                                               |
+    */
+    sha1_append_int(&ctx->sha1_ctx_text, ctx->outer_pad.words[ 0]);
 	sha1_append_int(&ctx->sha1_ctx_text, ctx->outer_pad.words[ 1]);
 	sha1_append_int(&ctx->sha1_ctx_text, ctx->outer_pad.words[ 2]);
 	sha1_append_int(&ctx->sha1_ctx_text, ctx->outer_pad.words[ 3]);

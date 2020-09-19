@@ -301,6 +301,7 @@ void sha1_ctx_finalize(sha1_ctx_t* ctx)
 	uint32_t len = ctx->chunk_counter*BITS_PER_BLOCK+ctx->word_counter*BITS_PER_WORD + (SHA1_COUNTER_INIT - ctx->counter);
 #ifdef DEBUG
 	assert(ctx->num_of_chunks > 0);
+	assert(ctx->num_of_chunks < BITS_PER_BLOCK);
 	assert(ctx->chunks != NULL);
 #endif
 
