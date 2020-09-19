@@ -4,7 +4,7 @@ void pbkdf2(pbkdf2_ctx_t* ctx)
 {
 	uint64_t j;
 	uint32_t U[W_PER_HASH];
-	
+
     ctx->T[0] = 0;
     ctx->T[1] = 0;
     ctx->T[2] = 0;
