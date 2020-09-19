@@ -37,7 +37,7 @@ int main(int argc, char** argv)
 {
     char salt[] = "salt";
     char password[] = "password";
-    int iteration_count = 16777216;
+    int iteration_count = 1;
 
     pbkdf2_ctx_t ctx;
     ctx.iteration_count = iteration_count;
@@ -48,8 +48,8 @@ int main(int argc, char** argv)
     ctx.password = (char*) malloc(ctx.strlen_password * sizeof(char));
     ctx.salt = (char*) malloc(ctx.strlen_salt * sizeof(char));
 
-    strncpy(ctx.password, password, ctx.strlen_password+1);
-    strncpy(ctx.salt, salt, ctx.strlen_salt+1);
+    strncpy(ctx.password, password, ctx.strlen_password);
+    strncpy(ctx.salt, salt, ctx.strlen_salt);
 
     pbkdf2(&ctx);
 
