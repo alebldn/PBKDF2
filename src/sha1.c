@@ -279,8 +279,6 @@ void sha1_ctx_init(sha1_ctx_t* ctx, uint64_t num_of_chunks)
 	assert(ctx != NULL);
 #endif
 
-	//ctx = (sha1_ctx_t*) malloc(sizeof(sha1_ctx_t));
-
 	ctx->num_of_chunks = num_of_chunks;
 	ctx->chunks = (chunk_t*) malloc(ctx->num_of_chunks * sizeof(chunk_t));
 #ifdef DEBUG

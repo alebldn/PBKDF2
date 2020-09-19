@@ -16,7 +16,7 @@
 #include <inttypes.h>
 
 /* Commentare la seguente riga quando non si e' in debug */
-#define DEBUG
+// #define DEBUG
 
 #define SHA1_COUNTER_INIT 	32
 #define SHA1_WCOUNTER_INIT	0
@@ -24,6 +24,7 @@
 
 #define BITS_PER_BLOCK		512
 #define BITS_PER_WORD		32
+#define BITS_PER_HASH       160
 #define W_PER_BLOCK 		16
 #define W_PER_HASH			5
 
