@@ -283,7 +283,9 @@ void sha1_ctx_init(sha1_ctx_t* ctx, uint64_t num_of_chunks)
 
 	ctx->num_of_chunks = num_of_chunks;
 	ctx->chunks = (chunk_t*) malloc(ctx->num_of_chunks * sizeof(chunk_t));
-
+#ifdef DEBUG
+	assert(ctx->chunks != NULL);
+#endif
 	for(i = 0; i < ctx->num_of_chunks; i++)
 		for(j = 0; j < W_PER_BLOCK; j++)
 			ctx->chunks[i].words[j] = 0;
@@ -317,6 +319,7 @@ void sha1_ctx_dispose(sha1_ctx_t* ctx)
 	assert(ctx->chunks != NULL);
 #endif
 	free(ctx->chunks);
+	ctx->chunks = NULL;
 }
 
 void sha1(sha1_ctx_t* ctx)

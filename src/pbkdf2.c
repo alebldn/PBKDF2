@@ -50,9 +50,9 @@ void pbkdf2_append_long_salt(pbkdf2_ctx_t* ctx, uint64_t value)
 	hmac_append_int_text(&ctx->hmac_ctx, value);
 }
 
-void pbkdf2_ctx_init(pbkdf2_ctx_t* ctx,	uint64_t bits_to_be_written_in_password, uint64_t bits_to_be_written_in_salt)
+void pbkdf2_ctx_init(pbkdf2_ctx_t* ctx)
 {
-	hmac_ctx_init(&ctx->hmac_ctx, bits_to_be_written_in_password, bits_to_be_written_in_salt + 32);
+	hmac_ctx_init(&ctx->hmac_ctx, ctx->strlen_password * 8, ctx->strlen_salt * 8 + 32);
 
 	ctx->T[0] = 0;
 	ctx->T[1] = 0;
@@ -105,9 +105,14 @@ void pbkdf2(pbkdf2_ctx_t* ctx)
 /*
  * for(i = 1 to len) (len = 1)
  */
+    pbkdf2_ctx_init(ctx);
+    pbkdf2_append_str_salt(ctx, ctx->salt, ctx->strlen_salt);
 	pbkdf2_append_int_salt(ctx, 1);
+
 	for(j = 1; j <= ctx->iteration_count; j++)
 	{
+        pbkdf2_append_str_password(ctx, ctx->password, ctx->strlen_password);
+
 		hmac(&ctx->hmac_ctx);
 		U[0] = ctx->hmac_ctx.digest[0];
 		U[1] = ctx->hmac_ctx.digest[1];
