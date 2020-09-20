@@ -28,12 +28,12 @@ void sha1_append_bit(sha1_ctx_t* ctx, bit_t bit)
 
 	if(ctx->counter == 0)
 	{
-		ctx->counter = SHA1_COUNTER_INIT;
+		ctx->counter = SHA1_BIT_COUNTER_INIT;
 		ctx->word_counter += 1;
 
-		if(ctx->word_counter == W_PER_BLOCK)
+		if(ctx->word_counter == WORDS_IN_CHUNK)
 		{
-			ctx->word_counter = SHA1_WCOUNTER_INIT;
+			ctx->word_counter = SHA1_WORD_COUNTER_INIT;
 			ctx->chunk_counter += 1;
 		}
 	}
@@ -114,7 +114,7 @@ void processing(sha1_ctx_t* ctx)
 
 	for(chunk_index = 0; chunk_index < ctx->num_of_chunks; chunk_index++)
 	{
-		for(word_index = 0; word_index < W_PER_BLOCK; word_index++)
+		for(word_index = 0; word_index < WORDS_IN_CHUNK; word_index++)
 			w[word_index] = ctx->chunks[chunk_index].words[word_index];
 
 		for(; word_index < 80; word_index++)
@@ -241,8 +241,8 @@ void print_digest(sha1_ctx_t* ctx)
 
 void sha1_pad(sha1_ctx_t* ctx)
 {
-	uint64_t cap = BITS_PER_BLOCK*(ctx->num_of_chunks - ctx->chunk_counter) -
-	        ctx->word_counter * SHA1_COUNTER_INIT - SHA1_COUNTER_INIT + ctx->counter - 64;
+	uint64_t cap = BITS_IN_CHUNK*(ctx->num_of_chunks - ctx->chunk_counter) -
+	        ctx->word_counter * SHA1_BIT_COUNTER_INIT - SHA1_BIT_COUNTER_INIT + ctx->counter - 64;
     #ifdef DEBUG
         assert(cap < BITS_PER_BLOCK);
     #endif
@@ -250,6 +250,13 @@ void sha1_pad(sha1_ctx_t* ctx)
 	for(uint64_t i = 0; i < cap; i++) {
         sha1_append_bit(ctx, 0);
     }
+}
+
+void sha1_ctx_reset_counters(sha1_ctx_t* ctx)
+{
+    ctx->word_counter 	= SHA1_WORD_COUNTER_INIT;
+    ctx->chunk_counter 	= SHA1_CHUNK_COUNTER_INIT;
+    ctx->counter 		= SHA1_BIT_COUNTER_INIT;
 }
 
 void sha1_ctx_init(sha1_ctx_t* ctx, uint64_t num_of_chunks)
@@ -269,20 +276,18 @@ void sha1_ctx_init(sha1_ctx_t* ctx, uint64_t num_of_chunks)
     #endif
 
 	for(i = 0; i < ctx->num_of_chunks; i++)
-		for(j = 0; j < W_PER_BLOCK; j++)
+		for(j = 0; j < WORDS_IN_CHUNK; j++)
 			ctx->chunks[i].words[j] = 0;
 
-	for(i = 0; i < W_PER_HASH; i++)
+	for(i = 0; i < WORDS_IN_HASH; i++)
 		ctx->digest[i] = 0;
 
-	ctx->word_counter 	= SHA1_WCOUNTER_INIT;
-	ctx->chunk_counter 	= SHA1_CCOUNTER_INIT;
-	ctx->counter 		= SHA1_COUNTER_INIT;
+    sha1_ctx_reset_counters(ctx);
 }
 
 void sha1_ctx_finalize(sha1_ctx_t* ctx)
 {
-	uint32_t len = ctx->chunk_counter*BITS_PER_BLOCK+ctx->word_counter*BITS_PER_WORD + (SHA1_COUNTER_INIT - ctx->counter);
+	uint32_t len = ctx->chunk_counter*BITS_IN_CHUNK+ctx->word_counter*BITS_IN_WORD + (SHA1_BIT_COUNTER_INIT - ctx->counter);
 
     #ifdef DEBUG
         assert(ctx->num_of_chunks > 0);

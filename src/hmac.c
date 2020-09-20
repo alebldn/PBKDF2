@@ -59,7 +59,7 @@ void hmac_append_long_text(hmac_ctx_t* ctx, uint64_t value)
 
 void hmac_pad(sha1_ctx_t* ctx)
 {
-	uint64_t cap = BITS_PER_BLOCK - (ctx->word_counter*SHA1_COUNTER_INIT + (32 - ctx->counter));
+	uint64_t cap = BITS_IN_CHUNK - (ctx->word_counter*SHA1_BIT_COUNTER_INIT + (32 - ctx->counter));
 
 #ifdef DEBUG
 	assert(cap > 0);
@@ -74,12 +74,12 @@ void hmac_pad(sha1_ctx_t* ctx)
 
 void hmac_ctx_key_init(hmac_ctx_t* ctx, uint64_t bits_to_be_written_in_key)
 {
-	sha1_ctx_init(&ctx->sha1_ctx_key, (bits_to_be_written_in_key + 1 + 64) / BITS_PER_BLOCK + 1);
+	sha1_ctx_init(&ctx->sha1_ctx_key, (bits_to_be_written_in_key + 1 + 64) / BITS_IN_CHUNK + 1);
 }
 
 void hmac_ctx_text_init(hmac_ctx_t* ctx, uint64_t bits_to_be_written_in_text)
 {
-	sha1_ctx_init(&ctx->sha1_ctx_text, (bits_to_be_written_in_text + 1 + 64) / BITS_PER_BLOCK + 1 + 1);
+	sha1_ctx_init(&ctx->sha1_ctx_text, (bits_to_be_written_in_text + 1 + 64) / BITS_IN_CHUNK + 1 + 1);
 	ctx->sha1_ctx_text.chunk_counter += 1;
 }
 
@@ -118,12 +118,6 @@ void hmac_ctx_reset(hmac_ctx_t* ctx)
 	ctx->outer_pad.words[13] = 0;
 	ctx->outer_pad.words[14] = 0;
 	ctx->outer_pad.words[15] = 0;
-
-	ctx->digest[0] = 0;
-	ctx->digest[1] = 0;
-	ctx->digest[2] = 0;
-	ctx->digest[3] = 0;
-	ctx->digest[4] = 0;
 }
 
 void hmac_ctx_init(hmac_ctx_t* ctx, uint64_t bits_to_be_written_in_key, uint64_t bits_to_be_written_in_text)
@@ -151,17 +145,16 @@ void hmac_ctx_dispose(hmac_ctx_t* ctx)
 
 void hmac(hmac_ctx_t* ctx)
 {
-	uint32_t i;
 	uint8_t temp_counter, temp_word_counter;
 	uint64_t temp_chunk_counter;
 	uint64_t bits_written_in_key, bits_written_in_text;
 
-	bits_written_in_key = ctx->sha1_ctx_key.chunk_counter*BITS_PER_BLOCK
-			+ ctx->sha1_ctx_key.word_counter*BITS_PER_WORD
+	bits_written_in_key = ctx->sha1_ctx_key.chunk_counter*BITS_IN_CHUNK
+			+ ctx->sha1_ctx_key.word_counter*BITS_IN_WORD
 			+ 32 - ctx->sha1_ctx_key.counter;
 
-    bits_written_in_text = ctx->sha1_ctx_text.chunk_counter*BITS_PER_BLOCK
-            + ctx->sha1_ctx_text.word_counter*BITS_PER_WORD
+    bits_written_in_text = ctx->sha1_ctx_text.chunk_counter*BITS_IN_CHUNK
+            + ctx->sha1_ctx_text.word_counter*BITS_IN_WORD
             + 32 - ctx->sha1_ctx_text.counter;
 
     /*
@@ -170,7 +163,7 @@ void hmac(hmac_ctx_t* ctx)
      *              zeros to create a B-byte string K0 (i.e., K0 = H(K) || 00...00). Go to step 4.
      */
 
-	if(bits_written_in_key > BITS_PER_BLOCK)
+	if(bits_written_in_key > BITS_IN_CHUNK)
 	{
 		sha1(&ctx->sha1_ctx_key);
 
@@ -197,11 +190,41 @@ void hmac(hmac_ctx_t* ctx)
 	 * Step 7       Exclusive-Or K0 with opad: K0 ⊕ opad.
 	 */
 
-	for(i = 0; i < W_PER_BLOCK; i++)
-	{
-		ctx->outer_pad.words[i] = ctx->sha1_ctx_key.chunks[0].words[i] ^ 0x5C5C5C5C;
-		ctx->inner_pad.words[i] = ctx->sha1_ctx_key.chunks[0].words[i] ^ 0x36363636;
-	}
+    ctx->inner_pad.words[ 0] = ctx->sha1_ctx_key.chunks[0].words[ 0] ^ INNER_PAD_XOR_CONST;
+    ctx->inner_pad.words[ 1] = ctx->sha1_ctx_key.chunks[0].words[ 1] ^ INNER_PAD_XOR_CONST;
+    ctx->inner_pad.words[ 2] = ctx->sha1_ctx_key.chunks[0].words[ 2] ^ INNER_PAD_XOR_CONST;
+    ctx->inner_pad.words[ 3] = ctx->sha1_ctx_key.chunks[0].words[ 3] ^ INNER_PAD_XOR_CONST;
+    ctx->inner_pad.words[ 4] = ctx->sha1_ctx_key.chunks[0].words[ 4] ^ INNER_PAD_XOR_CONST;
+    ctx->inner_pad.words[ 5] = ctx->sha1_ctx_key.chunks[0].words[ 5] ^ INNER_PAD_XOR_CONST;
+    ctx->inner_pad.words[ 6] = ctx->sha1_ctx_key.chunks[0].words[ 6] ^ INNER_PAD_XOR_CONST;
+    ctx->inner_pad.words[ 7] = ctx->sha1_ctx_key.chunks[0].words[ 7] ^ INNER_PAD_XOR_CONST;
+    ctx->inner_pad.words[ 8] = ctx->sha1_ctx_key.chunks[0].words[ 8] ^ INNER_PAD_XOR_CONST;
+    ctx->inner_pad.words[ 9] = ctx->sha1_ctx_key.chunks[0].words[ 9] ^ INNER_PAD_XOR_CONST;
+    ctx->inner_pad.words[10] = ctx->sha1_ctx_key.chunks[0].words[10] ^ INNER_PAD_XOR_CONST;
+    ctx->inner_pad.words[11] = ctx->sha1_ctx_key.chunks[0].words[11] ^ INNER_PAD_XOR_CONST;
+    ctx->inner_pad.words[12] = ctx->sha1_ctx_key.chunks[0].words[12] ^ INNER_PAD_XOR_CONST;
+    ctx->inner_pad.words[13] = ctx->sha1_ctx_key.chunks[0].words[13] ^ INNER_PAD_XOR_CONST;
+    ctx->inner_pad.words[14] = ctx->sha1_ctx_key.chunks[0].words[14] ^ INNER_PAD_XOR_CONST;
+    ctx->inner_pad.words[15] = ctx->sha1_ctx_key.chunks[0].words[15] ^ INNER_PAD_XOR_CONST;
+
+    ctx->outer_pad.words[ 0] = ctx->sha1_ctx_key.chunks[0].words[ 0] ^ OUTER_PAD_XOR_CONST;
+    ctx->outer_pad.words[ 1] = ctx->sha1_ctx_key.chunks[0].words[ 1] ^ OUTER_PAD_XOR_CONST;
+    ctx->outer_pad.words[ 2] = ctx->sha1_ctx_key.chunks[0].words[ 2] ^ OUTER_PAD_XOR_CONST;
+    ctx->outer_pad.words[ 3] = ctx->sha1_ctx_key.chunks[0].words[ 3] ^ OUTER_PAD_XOR_CONST;
+    ctx->outer_pad.words[ 4] = ctx->sha1_ctx_key.chunks[0].words[ 4] ^ OUTER_PAD_XOR_CONST;
+    ctx->outer_pad.words[ 5] = ctx->sha1_ctx_key.chunks[0].words[ 5] ^ OUTER_PAD_XOR_CONST;
+    ctx->outer_pad.words[ 6] = ctx->sha1_ctx_key.chunks[0].words[ 6] ^ OUTER_PAD_XOR_CONST;
+    ctx->outer_pad.words[ 7] = ctx->sha1_ctx_key.chunks[0].words[ 7] ^ OUTER_PAD_XOR_CONST;
+    ctx->outer_pad.words[ 8] = ctx->sha1_ctx_key.chunks[0].words[ 8] ^ OUTER_PAD_XOR_CONST;
+    ctx->outer_pad.words[ 9] = ctx->sha1_ctx_key.chunks[0].words[ 9] ^ OUTER_PAD_XOR_CONST;
+    ctx->outer_pad.words[10] = ctx->sha1_ctx_key.chunks[0].words[10] ^ OUTER_PAD_XOR_CONST;
+    ctx->outer_pad.words[11] = ctx->sha1_ctx_key.chunks[0].words[11] ^ OUTER_PAD_XOR_CONST;
+    ctx->outer_pad.words[12] = ctx->sha1_ctx_key.chunks[0].words[12] ^ OUTER_PAD_XOR_CONST;
+    ctx->outer_pad.words[13] = ctx->sha1_ctx_key.chunks[0].words[13] ^ OUTER_PAD_XOR_CONST;
+    ctx->outer_pad.words[14] = ctx->sha1_ctx_key.chunks[0].words[14] ^ OUTER_PAD_XOR_CONST;
+    ctx->outer_pad.words[15] = ctx->sha1_ctx_key.chunks[0].words[15] ^ OUTER_PAD_XOR_CONST;
+
+
 
 	/*
 	 * Step 5       Append the stream of data 'text' to the string resulting from step 4:
@@ -212,9 +235,7 @@ void hmac(hmac_ctx_t* ctx)
 	temp_word_counter = ctx->sha1_ctx_text.word_counter;
 	temp_chunk_counter = ctx->sha1_ctx_text.chunk_counter;
 
-	ctx->sha1_ctx_text.counter = SHA1_COUNTER_INIT;
-	ctx->sha1_ctx_text.word_counter = SHA1_WCOUNTER_INIT;
-	ctx->sha1_ctx_text.chunk_counter = SHA1_CCOUNTER_INIT;
+    sha1_ctx_reset_counters(&ctx->sha1_ctx_text);
 
 	sha1_append_int(&ctx->sha1_ctx_text, ctx->inner_pad.words[ 0]);
 	sha1_append_int(&ctx->sha1_ctx_text, ctx->inner_pad.words[ 1]);
@@ -233,7 +254,7 @@ void hmac(hmac_ctx_t* ctx)
 	sha1_append_int(&ctx->sha1_ctx_text, ctx->inner_pad.words[14]);
 	sha1_append_int(&ctx->sha1_ctx_text, ctx->inner_pad.words[15]);
 
-	ctx->sha1_ctx_text.num_of_chunks = bits_written_in_text / BITS_PER_BLOCK + 1;
+	ctx->sha1_ctx_text.num_of_chunks = bits_written_in_text / BITS_IN_CHUNK + 1;
     ctx->sha1_ctx_text.counter = temp_counter;
 	ctx->sha1_ctx_text.word_counter = temp_word_counter;
 	ctx->sha1_ctx_text.chunk_counter = temp_chunk_counter;

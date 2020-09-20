@@ -8,25 +8,23 @@
 #define SHA1_H_
 
 #include <stdio.h>
-#include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <assert.h>
 #include <inttypes.h>
 
 /* Commentare la seguente riga quando non si e' in debug */
-// #define DEBUG
+//#define DEBUG
 
-#define SHA1_COUNTER_INIT 	32
-#define SHA1_WCOUNTER_INIT	0
-#define SHA1_CCOUNTER_INIT 	0
+#define SHA1_BIT_COUNTER_INIT 	    32
+#define SHA1_WORD_COUNTER_INIT	    0
+#define SHA1_CHUNK_COUNTER_INIT 	0
 
-#define BITS_PER_BLOCK		512
-#define BITS_PER_WORD		32
-#define BITS_PER_HASH       160
-#define W_PER_BLOCK 		16
-#define W_PER_HASH			5
+#define BITS_IN_CHUNK		        512
+#define BITS_IN_WORD		        32
+#define BITS_IN_HASH                160
+#define WORDS_IN_CHUNK 		        16
+#define WORDS_IN_HASH			    5
 
 typedef enum
 {
@@ -36,13 +34,13 @@ typedef enum
 
 typedef struct
 {
-	uint32_t words[W_PER_BLOCK];
+	uint32_t words[WORDS_IN_CHUNK];
 } chunk_t;
 
 typedef struct
 {
 	chunk_t* 	chunks;
-	uint32_t 	digest[W_PER_HASH];
+	uint32_t 	digest[WORDS_IN_HASH];
 	uint64_t 	num_of_chunks;
 	uint64_t 	chunk_counter;
 	uint8_t 	word_counter;
@@ -54,15 +52,17 @@ void sha1_append_char(sha1_ctx_t* ctx, char value);
 void sha1_append_int(sha1_ctx_t* ctx, uint32_t value);
 void sha1_append_long(sha1_ctx_t* ctx, uint64_t value);
 void sha1_append_str(sha1_ctx_t* ctx, char* str, uint64_t strlen);
-uint32_t rotate_left(const uint32_t value, int32_t shift);
+uint32_t rotate_left(uint32_t value, int32_t shift);
 
 void sha1(sha1_ctx_t* ctx);
 void sha1_ctx_init(sha1_ctx_t* ctx, uint64_t num_of_chunks);
 void sha1_ctx_finalize(sha1_ctx_t* ctx);
 void sha1_ctx_dispose(sha1_ctx_t* ctx);
 void sha1_pad(sha1_ctx_t* ctx);
+void sha1_ctx_reset_counters(sha1_ctx_t* ctx);
 
 #ifdef DEBUG
+#include <assert.h>
 void print_chunks(sha1_ctx_t* ctx);
 void print_digest(sha1_ctx_t* ctx);
 #endif

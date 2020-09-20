@@ -18,7 +18,7 @@ typedef struct
 	uint32_t strlen_password;
 	uint32_t strlen_salt;
 	uint64_t iteration_count;
-	uint32_t T[W_PER_HASH];
+	uint32_t T[WORDS_IN_HASH];
 
 } pbkdf2_ctx_t;
 

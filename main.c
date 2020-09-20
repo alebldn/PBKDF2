@@ -36,7 +36,7 @@ int main(int argc, char** argv)
 {
     char salt[] = "salt";
     char password[] = "password";
-    int iteration_count = 1;
+    int iteration_count = 4096;
 
     pbkdf2_ctx_t ctx;
     ctx.iteration_count = iteration_count;
