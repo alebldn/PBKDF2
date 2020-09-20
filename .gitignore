@@ -1,0 +1,4 @@
+cmake-build-debug/
+
+src/CMakeLists.txt
+CMakeLists.txt

@@ -243,28 +243,10 @@ void sha1_pad(sha1_ctx_t* ctx)
 {
 	uint64_t cap = BITS_PER_BLOCK*(ctx->num_of_chunks - ctx->chunk_counter) -
 	        ctx->word_counter * SHA1_COUNTER_INIT - SHA1_COUNTER_INIT + ctx->counter - 64;
+    #ifdef DEBUG
+        assert(cap < BITS_PER_BLOCK);
+    #endif
 
-	if(cap > BITS_PER_BLOCK) {
-    /*
-     * Probabilmente l'errore qui generato sta nel fatto che num_of_chunks è sbagliato
-     * Non per dire ma secondo me manca un hmac_ctx_text_init
-     */
-        printf("Chunks:\n");
-        for(uint32_t i = 0; i < W_PER_BLOCK; i++)
-        {
-            printf("Word %02u: %8x\n", i, ctx->chunks->words[i]);
-        }
-
-        printf("\nDigest: \n");
-        for(uint32_t i = 0; i < W_PER_HASH; i++)
-        {
-            printf("Word %02u: %8x\n", i, ctx->digest[i]);
-        }
-        printf("cap: %10d\n", cap);
-    }
-#ifdef DEBUG
-	assert(cap < BITS_PER_BLOCK);
-#endif
 	for(uint64_t i = 0; i < cap; i++) {
         sha1_append_bit(ctx, 0);
     }
@@ -274,16 +256,18 @@ void sha1_ctx_init(sha1_ctx_t* ctx, uint64_t num_of_chunks)
 {
 	uint32_t i, j;
 
-#ifdef DEBUG
-	assert(num_of_chunks > 0);
-	assert(ctx != NULL);
-#endif
+    #ifdef DEBUG
+        assert(num_of_chunks > 0);
+        assert(ctx != NULL);
+    #endif
 
 	ctx->num_of_chunks = num_of_chunks;
 	ctx->chunks = (chunk_t*) malloc(ctx->num_of_chunks * sizeof(chunk_t));
-#ifdef DEBUG
-	assert(ctx->chunks != NULL);
-#endif
+
+    #ifdef DEBUG
+        assert(ctx->chunks != NULL);
+    #endif
+
 	for(i = 0; i < ctx->num_of_chunks; i++)
 		for(j = 0; j < W_PER_BLOCK; j++)
 			ctx->chunks[i].words[j] = 0;
@@ -299,11 +283,12 @@ void sha1_ctx_init(sha1_ctx_t* ctx, uint64_t num_of_chunks)
 void sha1_ctx_finalize(sha1_ctx_t* ctx)
 {
 	uint32_t len = ctx->chunk_counter*BITS_PER_BLOCK+ctx->word_counter*BITS_PER_WORD + (SHA1_COUNTER_INIT - ctx->counter);
-#ifdef DEBUG
-	assert(ctx->num_of_chunks > 0);
-	assert(ctx->num_of_chunks < BITS_PER_BLOCK);
-	assert(ctx->chunks != NULL);
-#endif
+
+    #ifdef DEBUG
+        assert(ctx->num_of_chunks > 0);
+        assert(ctx->num_of_chunks < BITS_PER_BLOCK);
+        assert(ctx->chunks != NULL);
+    #endif
 
 	sha1_append_bit(ctx, 1);
 	sha1_pad(ctx);
@@ -312,24 +297,27 @@ void sha1_ctx_finalize(sha1_ctx_t* ctx)
 
 void sha1_ctx_dispose(sha1_ctx_t* ctx)
 {
-#ifdef DEBUG
-	assert(ctx != NULL);
-	assert(ctx->chunks != NULL);
-#endif
+    #ifdef DEBUG
+        assert(ctx != NULL);
+        assert(ctx->chunks != NULL);
+    #endif
+
 	free(ctx->chunks);
 	ctx->chunks = NULL;
 }
 
 void sha1(sha1_ctx_t* ctx)
 {
-#ifdef DEBUG
-	assert(ctx->chunk_counter == ctx->num_of_chunks);
-	assert(ctx->word_counter == SHA1_WCOUNTER_INIT);
-	assert(ctx->counter == SHA1_COUNTER_INIT);
-#endif
+    #ifdef DEBUG
+        assert(ctx->chunk_counter == ctx->num_of_chunks);
+        assert(ctx->word_counter == SHA1_WCOUNTER_INIT);
+        assert(ctx->counter == SHA1_COUNTER_INIT);
+    #endif
+
 	processing(ctx);
-#ifdef DEBUG
-	print_chunks(ctx);
-	print_digest(ctx);
-#endif
+
+    #ifdef DEBUG
+        print_chunks(ctx);
+        print_digest(ctx);
+    #endif
 }

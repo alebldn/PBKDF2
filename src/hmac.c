@@ -169,6 +169,7 @@ void hmac(hmac_ctx_t* ctx)
      * Step 2       If the length of K > B: hash K to obtain an L byte string, then append (B-L)
      *              zeros to create a B-byte string K0 (i.e., K0 = H(K) || 00...00). Go to step 4.
      */
+
 	if(bits_written_in_key > BITS_PER_BLOCK)
 	{
 		sha1(&ctx->sha1_ctx_key);
@@ -182,29 +183,31 @@ void hmac(hmac_ctx_t* ctx)
 		sha1_append_int(&ctx->sha1_ctx_key, ctx->sha1_ctx_key.digest[3]);
 		sha1_append_int(&ctx->sha1_ctx_key, ctx->sha1_ctx_key.digest[4]);
 	}
+
 	/*
 	 * Step 3       If the length of K < B: append zeros to the end of K to create a B-byte string K0
      *              (e.g., if K is 20 bytes in length and B = 64, then K will be appended with 44
      *              zero bytes x’00’).
 	 */
+
 	hmac_pad(&ctx->sha1_ctx_key);
 
 	/*
 	 * Step 4       Exclusive-Or K0 with ipad to produce a B-byte string: K0 ⊕ ipad.
 	 * Step 7       Exclusive-Or K0 with opad: K0 ⊕ opad.
 	 */
+
 	for(i = 0; i < W_PER_BLOCK; i++)
 	{
 		ctx->outer_pad.words[i] = ctx->sha1_ctx_key.chunks[0].words[i] ^ 0x5C5C5C5C;
 		ctx->inner_pad.words[i] = ctx->sha1_ctx_key.chunks[0].words[i] ^ 0x36363636;
 	}
 
-	// sha1_ctx_dispose(&ctx->sha1_ctx_key);
-
 	/*
 	 * Step 5       Append the stream of data 'text' to the string resulting from step 4:
 	 *              (K0 ⊕ ipad) || text.
 	 */
+
 	temp_counter = ctx->sha1_ctx_text.counter;
 	temp_word_counter = ctx->sha1_ctx_text.word_counter;
 	temp_chunk_counter = ctx->sha1_ctx_text.chunk_counter;
@@ -236,9 +239,11 @@ void hmac(hmac_ctx_t* ctx)
 	ctx->sha1_ctx_text.chunk_counter = temp_chunk_counter;
 
 	sha1_ctx_finalize(&ctx->sha1_ctx_text);
+
     /*
      * Step 6       Apply H to the stream generated in step 5: H((K0 ⊕ ipad) || text).
      */
+
 	sha1(&ctx->sha1_ctx_text);
 
 	ctx->digest[0] = ctx->sha1_ctx_text.digest[0];
@@ -248,13 +253,7 @@ void hmac(hmac_ctx_t* ctx)
 	ctx->digest[4] = ctx->sha1_ctx_text.digest[4];
 
 	sha1_ctx_dispose(&ctx->sha1_ctx_text);
-	/**
-	 * Il problema sta qui
-	 */
 	sha1_ctx_init(&ctx->sha1_ctx_text, 2);
-    /**                                             ^
-    *                                               |
-    */
 
     /*
      * Step 8       Append the result from step 6 to step 7:
@@ -290,6 +289,7 @@ void hmac(hmac_ctx_t* ctx)
 	 * Step 9       Apply H to the result from step 8:
      *              H((K0 ⊕ opad )|| H((K0 ⊕ ipad) || text))
 	 */
+
 	sha1(&ctx->sha1_ctx_text);
 
 	ctx->digest[0] = ctx->sha1_ctx_text.digest[0];
@@ -298,6 +298,7 @@ void hmac(hmac_ctx_t* ctx)
 	ctx->digest[3] = ctx->sha1_ctx_text.digest[3];
 	ctx->digest[4] = ctx->sha1_ctx_text.digest[4];
 }
+
 /*
 int main()
 {
@@ -305,12 +306,10 @@ int main()
 	char text[] = "The quick brown fox jumps over the lazy dog";
 	hmac_ctx_t ctx;
 
-	hmac_ctx_reset(&ctx);
-	hmac_ctx_key_init(&ctx, strlen(key) * 8);
-	hmac_ctx_text_init(&ctx, strlen(text) * 8);
+	hmac_ctx_init(&ctx, strlen(key) * 8, strlen(text) * 8);
 
 	for(uint32_t i = 0; i < strlen(key); i++)
-			hmac_append_char_key(&ctx, key[i]);
+		hmac_append_char_key(&ctx, key[i]);
 
 	for(uint32_t i = 0; i < strlen(text); i++)
 		hmac_append_char_text(&ctx, text[i]);
