@@ -1,12 +1,5 @@
-/*
- * hmac_sha1.h
- *
- *  Created on: Mar 12, 2020
- *      Author: Delta
- */
-
-#ifndef HMAC_H_
-#define HMAC_H_
+#ifndef HMAC_H
+#define HMAC_H
 
 #include "sha1.h"
 
@@ -15,11 +8,11 @@
 
 typedef struct
 {
-	sha1_ctx_t sha1_ctx_text;
-	sha1_ctx_t sha1_ctx_key;
-	chunk_t outer_pad;
-	chunk_t inner_pad;
-	uint32_t digest[WORDS_IN_HASH];
+    sha1_ctx_t sha1_ctx_text;
+    sha1_ctx_t sha1_ctx_key;
+    chunk_t outer_pad;
+    chunk_t inner_pad;
+    uint32_t digest[WORDS_IN_HASH];
 
 } hmac_ctx_t;
 
@@ -39,4 +32,4 @@ void hmac_ctx_init(hmac_ctx_t* ctx, uint64_t bytes_to_be_written_in_key, uint64_
 void hmac_ctx_dispose(hmac_ctx_t* ctx);
 void hmac(hmac_ctx_t* ctx);
 
-#endif /* HMAC_H_ */
+#endif /* HMAC_H */

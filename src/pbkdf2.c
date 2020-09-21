@@ -13,12 +13,12 @@ void pbkdf2(pbkdf2_ctx_t* ctx)
 
     hmac_ctx_init(&ctx->hmac_ctx, ctx->strlen_password * 8, ctx->strlen_salt * 8 + 32 + BITS_IN_CHUNK);
 
-    hmac_append_str_text(ctx, ctx->salt, ctx->strlen_salt);
-    hmac_append_int_text(ctx, 1);
+    hmac_append_str_text(&ctx->hmac_ctx, ctx->salt, ctx->strlen_salt);
+    hmac_append_int_text(&ctx->hmac_ctx, 1);
 
 	for(j = 1; j <= ctx->iteration_count; j++)
 	{
-        hmac_append_str_key(ctx, ctx->password, ctx->strlen_password);
+        hmac_append_str_key(&ctx->hmac_ctx, ctx->password, ctx->strlen_password);
 		hmac(&ctx->hmac_ctx);
 
         hmac_ctx_dispose(&ctx->hmac_ctx);

@@ -1,20 +1,11 @@
-/*
- * sha1.h
- *
- *  Created on: Mar 5, 2020
- *      Author: Delta
- */
-#ifndef SHA1_H_
-#define SHA1_H_
+#ifndef SHA1_H
+#define SHA1_H
 
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <inttypes.h>
-
-/* Commentare la seguente riga quando non si e' in debug */
-//#define DEBUG
 
 #define SHA1_BIT_COUNTER_INIT 	    32
 #define SHA1_WORD_COUNTER_INIT	    0
@@ -28,23 +19,23 @@
 
 typedef enum
 {
-	false,
-	true
+    false,
+    true
 } bit_t;
 
 typedef struct
 {
-	uint32_t words[WORDS_IN_CHUNK];
+    uint32_t words[WORDS_IN_CHUNK];
 } chunk_t;
 
 typedef struct
 {
-	chunk_t* 	chunks;
-	uint32_t 	digest[WORDS_IN_HASH];
-	uint64_t 	num_of_chunks;
-	uint64_t 	chunk_counter;
-	uint8_t 	word_counter;
-	uint8_t 	counter;
+    chunk_t* 	chunks;
+    uint32_t 	digest[WORDS_IN_HASH];
+    uint64_t 	num_of_chunks;
+    uint64_t 	chunk_counter;
+    uint8_t 	word_counter;
+    uint8_t 	counter;
 } sha1_ctx_t;
 
 void sha1_append_bit(sha1_ctx_t* ctx, bit_t bit);
@@ -53,6 +44,7 @@ void sha1_append_int(sha1_ctx_t* ctx, uint32_t value);
 void sha1_append_long(sha1_ctx_t* ctx, uint64_t value);
 void sha1_append_str(sha1_ctx_t* ctx, char* str, uint64_t strlen);
 uint32_t rotate_left(uint32_t value, int32_t shift);
+uint32_t rotate_right(uint32_t value, int32_t shift);
 
 void sha1(sha1_ctx_t* ctx);
 void sha1_ctx_init(sha1_ctx_t* ctx, uint64_t num_of_chunks);
@@ -61,10 +53,4 @@ void sha1_ctx_dispose(sha1_ctx_t* ctx);
 void sha1_pad(sha1_ctx_t* ctx);
 void sha1_ctx_reset_counters(sha1_ctx_t* ctx);
 
-#ifdef DEBUG
-#include <assert.h>
-void print_chunks(sha1_ctx_t* ctx);
-void print_digest(sha1_ctx_t* ctx);
-#endif
-
-#endif /* SHA1_H_ */
+#endif /* SHA1_H */

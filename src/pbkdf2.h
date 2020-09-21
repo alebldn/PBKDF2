@@ -5,8 +5,8 @@
  *      Author: Delta
  */
 
-#ifndef PBKDF2_H_
-#define PBKDF2_H_
+#ifndef PBKDF2_H
+#define PBKDF2_H
 
 #include "hmac.h"
 
@@ -24,4 +24,4 @@ typedef struct
 
 void pbkdf2(pbkdf2_ctx_t* ctx);
 
-#endif /* PBKDF2_H_ */
+#endif /* PBKDF2_H */

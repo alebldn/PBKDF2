@@ -1,34 +1,31 @@
 #include "src/pbkdf2.h"
+#include <string.h>
 
 /*     CHEATSHEET
 
 Input:
-       P = "password" (8 octets)
-       S = "salt" (4 octets)
-       c = 1
-Output:
-       DK = 0c60c80f 961f0e71 f3a9b524 af601206 2fe037a6
+        P =         password
+        S =         salt
+        c =         1
+        Output =    0c60c80f 961f0e71 f3a9b524 af601206 2fe037a6
 
 Input:
-       P = "password" (8 octets)
-       S = "salt" (4 octets)
-       c = 2
-Output:
-       DK = ea6c014d c72d6f8c cd1ed92a ce1d41f0 d8de8957
+        P =         password
+        S =         salt
+        c =         2
+        Output =    ea6c014d c72d6f8c cd1ed92a ce1d41f0 d8de8957
 
 Input:
-       P = "password" (8 octets)
-       S = "salt" (4 octets)
-       c = 4096
-Output:
-       DK = 4b007901 b765489a bead49d9 26f721d0 65a429c1
+        P =         password
+        S =         salt
+        c =         4096
+        Output =    4b007901 b765489a bead49d9 26f721d0 65a429c1
 
 Input:
-       P = "password" (8 octets)
-       S = "salt" (4 octets)
-       c = 16777216
-Output:
-       DK = eefe3d61 cd4da4e4 e9945b3d 6ba2158c 2634e984
+        P =         password
+        S =         salt
+        c =         16777216
+        Output =    eefe3d61 cd4da4e4 e9945b3d 6ba2158c 2634e984
 
  */
 
@@ -36,7 +33,7 @@ int main(int argc, char** argv)
 {
     char salt[] = "salt";
     char password[] = "password";
-    int iteration_count = 4096;
+    int iteration_count = 2;
 
     pbkdf2_ctx_t ctx;
     ctx.iteration_count = iteration_count;
