@@ -540,6 +540,7 @@ void hmac(hmac_ctx_t *ctx) {
     ctx->digest[3] = ctx->sha1_ctx_text.digest[3];
     ctx->digest[4] = ctx->sha1_ctx_text.digest[4];
 }
+
 /** Example Main
  *
  * hmac_sha1("Key", "Text");
